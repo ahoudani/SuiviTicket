@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Suivi des tickets</title>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Gestion des tickets</h1>
+    <p>Système de suivi / XRP-Sprint MTS</p>
+  </div>
+
+  <div class="content">
+    <div class="actions-bar">
+      <h2 style="color: #1e293b; font-size: 1.5rem; font-weight: 600;">Dashboard</h2>
+      <button onclick="newTicket()" class="btn btn-primary" title="Ajouter un ticket">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Nouveau ticket
+      </button>
+      <a href="notes.html" class="btn btn-secondary" title="Bloc-notes">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14,2 14,8 20,8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      Bloc-Notes
+    </a>
+    </div>
+
+    <div class="search-section">
+      <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        Recherche et filtres
+      </h3>
+      
+      <div class="search-grid">
+        <div class="form-group">
+          <input type="text" id="searchNum" placeholder="Numéro du ticket" />
+        </div>
+        <div class="form-group">
+          <input type="text" id="searchNom" placeholder="Nom du ticket" />
+        </div>
+        <div class="form-group">
+          <select id="searchState">
+            <option value="Tous">Tous les états</option>
+            <option value="Dev">Dev</option>
+            <option value="Test">Test</option>
+            <option value="Done">Done</option>
+            <option value="StandBy">StandBy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <select id="searchType">
+            <option value="Tous">Tous les types</option>
+            <option value="PBI">PBI</option>
+            <option value="Bug">Bug</option>
+            <option value="Spike">Spike</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="search-buttons">
+        <button id="btnSearch" class="btn btn-search" title="Rechercher">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          Rechercher
+        </button>
+        <button id="btnReset" class="btn btn-reset" title="Réinitialiser">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 21v-5h5"/>
+          </svg>
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table id="ticketsTable" aria-label="Liste des tickets">
+          <thead>
+            <tr>
+              <th style="width: 120px;">Actions</th>
+              <th style="width: 100px;">Numéro</th>
+              <th style="width: 80px;">Type</th>
+              <th style="width: 200px;">Nom</th>
+              <th style="width: 150px;">Base de travail</th>
+              <th style="width: 120px;">Serveur base</th>
+              <th style="width: 180px;">Chemin Git local</th>
+              <th style="width: 150px;">Branche Git</th>
+              <th style="width: 100px;">État</th>              
+            </tr>
+          </thead>
+          <tbody>          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+    <footer>
+       <p>Abdessamad.Houdani©2025 Cegid. Tous droits réservés.</p>
+    <footer>  
+</div>
+
+<script src="index.js"></script>
+<script src="notifications.js"></script>
+</body>
+</html>
