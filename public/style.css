@@ -532,6 +532,109 @@ tbody td {
   transform: translateY(-1px);
 }
 
+/* ---- Tickets liés ---- */
+.tickets-lies-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  min-height: 10px;
+}
+
+.ticket-lie-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 4px 10px 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e40af;
+}
+
+.ticket-lie-link {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.ticket-lie-link:hover {
+  text-decoration: underline;
+}
+
+.ticket-lie-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ticket-lie-remove:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.autocomplete-container {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  z-index: 100;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.autocomplete-dropdown:empty {
+  display: none;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.1s;
+}
+
+.autocomplete-item:hover {
+  background: #eff6ff;
+}
+
+.ac-numero {
+  font-weight: 700;
+  color: #1d4ed8;
+  white-space: nowrap;
+}
+
+.ac-nom {
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Fin Tickets liés ---- */
+
 /* Badges */
 .status-badge {
   display: inline-flex;

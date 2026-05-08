@@ -5,6 +5,131 @@ const API_URL = 'http://localhost:3000/tickets';
 const urlParams = new URLSearchParams(window.location.search);
 const ticketId = urlParams.get('id');
 
+// --- Tickets liés ---
+let allTickets = [];
+let ticketsLies = [];          // [{id, numero, nom}]
+let originalTicketsLiesIds = []; // IDs au dernier chargement (pour diff bidirectionnel)
+
+async function fetchAllTickets() {
+  try {
+    const res = await fetch(API_URL);
+    allTickets = await res.json();
+  } catch (e) {
+    console.error('Erreur fetchAllTickets:', e);
+  }
+}
+
+function renderTicketsLiesBadges() {
+  const container = document.getElementById('ticketsLiesBadges');
+  if (!container) return;
+  container.innerHTML = '';
+  ticketsLies.forEach(t => {
+    const badge = document.createElement('span');
+    badge.className = 'ticket-lie-badge';
+    badge.innerHTML =
+      `<a href="ticket-form.html?id=${t.id}" class="ticket-lie-link">${t.numero} — ${t.nom}</a>` +
+      `<button type="button" class="ticket-lie-remove" data-id="${t.id}" title="Retirer le lien">×</button>`;
+    badge.querySelector('.ticket-lie-remove').addEventListener('click', () => removeTicketLie(t.id));
+    container.appendChild(badge);
+  });
+}
+
+function addTicketLie(ticket) {
+  if (!ticketsLies.find(t => String(t.id) === String(ticket.id))) {
+    ticketsLies.push({ id: ticket.id, numero: ticket.numero, nom: ticket.nom });
+    renderTicketsLiesBadges();
+  }
+  document.getElementById('ticketsLiesInput').value = '';
+  closeAutocomplete();
+}
+
+function removeTicketLie(id) {
+  ticketsLies = ticketsLies.filter(t => String(t.id) !== String(id));
+  renderTicketsLiesBadges();
+}
+
+function closeAutocomplete() {
+  const dropdown = document.getElementById('autocompleteDropdown');
+  if (dropdown) dropdown.innerHTML = '';
+}
+
+function setupAutocomplete() {
+  const input = document.getElementById('ticketsLiesInput');
+  if (!input) return;
+
+  input.addEventListener('input', function () {
+    const query = this.value.trim().toLowerCase();
+    const dropdown = document.getElementById('autocompleteDropdown');
+    dropdown.innerHTML = '';
+    if (!query) return;
+
+    const currentId = String(document.getElementById('ticketId').value);
+    const lieIds = ticketsLies.map(t => String(t.id));
+
+    const matches = allTickets.filter(t =>
+      String(t.id) !== currentId &&
+      !lieIds.includes(String(t.id)) &&
+      ((t.numero || '').toLowerCase().includes(query) || (t.nom || '').toLowerCase().includes(query))
+    ).slice(0, 8);
+
+    matches.forEach(t => {
+      const li = document.createElement('li');
+      li.className = 'autocomplete-item';
+      li.innerHTML = `<span class="ac-numero">${t.numero}</span><span class="ac-nom">${t.nom}</span>`;
+      li.addEventListener('mousedown', e => {
+        e.preventDefault();
+        addTicketLie(t);
+      });
+      dropdown.appendChild(li);
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.autocomplete-container')) {
+      closeAutocomplete();
+    }
+  });
+}
+
+async function syncBidirectionnel(currentId) {
+  currentId = String(currentId);
+  const newIds = ticketsLies.map(t => String(t.id));
+  const oldIds = originalTicketsLiesIds.map(String);
+
+  const added   = newIds.filter(id => !oldIds.includes(id));
+  const removed = oldIds.filter(id => !newIds.includes(id));
+
+  const updates = [];
+
+  for (const id of added) {
+    const target = allTickets.find(t => String(t.id) === id);
+    if (!target) continue;
+    const targetLieIds = (target.ticketsLies || []).map(String);
+    if (!targetLieIds.includes(currentId)) {
+      updates.push(fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketsLies: [...targetLieIds.map(Number), Number(currentId)] })
+      }));
+    }
+  }
+
+  for (const id of removed) {
+    const target = allTickets.find(t => String(t.id) === id);
+    if (!target) continue;
+    const targetLieIds = (target.ticketsLies || []).map(String).filter(tid => tid !== currentId);
+    updates.push(fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticketsLies: targetLieIds.map(Number) })
+    }));
+  }
+
+  await Promise.all(updates);
+  originalTicketsLiesIds = ticketsLies.map(t => t.id);
+  await fetchAllTickets();
+}
+
 // Charger les données du ticket si on est en mode édition
 if (ticketId) {
   loadTicketData(ticketId);
@@ -14,6 +139,7 @@ async function loadTicketData(id) {
   try {
     const res = await fetch(API_URL);
     const tickets = await res.json();
+    allTickets = tickets;
     const ticket = tickets.find(t => t.id == id);
     
     if (!ticket) {
@@ -39,6 +165,15 @@ async function loadTicketData(id) {
 
     document.getElementById('formTitle').textContent = ticket.nom.slice(0,99) || '';
 
+    // Initialiser les tickets liés
+    const lieIds = ticket.ticketsLies || [];
+    ticketsLies = lieIds.map(lid => {
+      const t = allTickets.find(t => String(t.id) === String(lid));
+      return t ? { id: t.id, numero: t.numero, nom: t.nom } : null;
+    }).filter(Boolean);
+    originalTicketsLiesIds = ticketsLies.map(t => t.id);
+    renderTicketsLiesBadges();
+
   } catch (error) {
     console.error('Erreur lors du chargement du ticket:', error);
     // alert('Erreur lors du chargement du ticket');
@@ -62,7 +197,8 @@ document.getElementById('ticketForm').addEventListener('submit', async e => {
     informations: document.getElementById('informations').value.trim(),
     remarques: document.getElementById('remarques').value.trim(),
     modifications: document.getElementById('modifications').value.trim(),
-    bobs: document.getElementById('bobs').value.trim()
+    bobs: document.getElementById('bobs').value.trim(),
+    ticketsLies: ticketsLies.map(t => t.id)
   };
 
   if (!ticketData.numero || !ticketData.type || !ticketData.nom || !ticketData.state) {
@@ -101,11 +237,11 @@ document.getElementById('ticketForm').addEventListener('submit', async e => {
 
     showNotification('Ticket enregistré avec succès !', 'success');
     
-    // Maintenant vous avez l'ID correct pour les deux cas
-    console.log('ID du ticket:', finalTicketId);
-    
     // Mettre à jour le champ caché avec le nouvel ID (pour les nouveaux tickets)
     document.getElementById('ticketId').value = finalTicketId;
+
+    // Synchroniser les liaisons bidirectionnelles
+    await syncBidirectionnel(finalTicketId);
     
     // Recharger les données du ticket
     loadTicketData(finalTicketId);
@@ -146,4 +282,11 @@ document.addEventListener("DOMContentLoaded", function () {
         brancheGitInput.value = "";
       }
     });
+
+    // Charger tous les tickets pour l'autocomplete (nouveau ticket uniquement,
+    // en édition c'est fait dans loadTicketData)
+    if (!ticketId) {
+      fetchAllTickets();
+    }
+    setupAutocomplete();
   });
