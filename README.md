@@ -22,7 +22,15 @@ Par exemple :
 cd /d "C:\Votre\Dossier\Projet\suiviticket"
 
 Sauvegardez le fichier lancer_suiviticket.bat après modification.
+Installer les dépendances Node.js :
 
+Ouvrez un terminal dans le dossier du projet et exécutez :
+
+```
+npm install
+```
+
+Cette commande installe toutes les dépendances nécessaires (dossier `node_modules`). À ne faire qu'une seule fois après le clonage, ou si `node_modules` est absent.
 Lancer l’application :
 
 Double-cliquez sur le fichier lancer_suiviticket.bat.
