@@ -6,6 +6,8 @@ const API_URL = 'http://localhost:3000/notes';
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchNotes');
+    searchInput.addEventListener('input', displaySavedNotes);
     loadSavedNotes();
 
 });
@@ -118,26 +120,63 @@ async function loadSavedNotes() {
 // Afficher les notes sauvegardées
 function displaySavedNotes() {
     const container = document.getElementById('savedNotesContainer');
+    const searchValue = document.getElementById('searchNotes').value.trim().toLowerCase();
+    const filteredNotes = savedNotes.filter(note => {
+        if (!searchValue) {
+            return true;
+        }
+
+        const noteContent = (note.content || '').toLowerCase();
+        const noteTimestamp = (note.timestamp || '').toLowerCase();
+        return noteContent.includes(searchValue) || noteTimestamp.includes(searchValue);
+    });
     
     if (savedNotes.length === 0) {
         container.innerHTML = '<p style="color: #6b7280; font-style: italic; text-align: center;">Aucune note sauvegardée</p>';
         return;
     }
-    
-    container.innerHTML = savedNotes.slice(0, 5).map(note => `
-        <div class="quick-note-item">
-            <div class="note-actions">
-                <button class="btn-note-action btn-edit" onclick="editSelectedNote(${note.id})" title="Modifier">
-                    ✏️
-                </button>
-                <button class="btn-note-action btn-delete" onclick="deleteNote(${note.id})" title="Supprimer">
-                    ×
-                </button>
-            </div>
-            <div class="note-timestamp">${note.timestamp}</div>
-            <div class="note-content">${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}</div>
-        </div>
-    `).join('');
+
+    if (filteredNotes.length === 0) {
+        container.innerHTML = '<p style="color: #6b7280; font-style: italic; text-align: center;">Aucune note ne correspond à la recherche</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    filteredNotes.forEach(note => {
+        const noteItem = document.createElement('div');
+        noteItem.className = 'quick-note-item';
+
+        const noteActions = document.createElement('div');
+        noteActions.className = 'note-actions';
+
+        const editButton = document.createElement('button');
+        editButton.className = 'btn-note-action btn-edit';
+        editButton.type = 'button';
+        editButton.title = 'Modifier';
+        editButton.textContent = '✏️';
+        editButton.addEventListener('click', () => editSelectedNote(note.id));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn-note-action btn-delete';
+        deleteButton.type = 'button';
+        deleteButton.title = 'Supprimer';
+        deleteButton.textContent = '×';
+        deleteButton.addEventListener('click', () => deleteNote(note.id));
+
+        noteActions.append(editButton, deleteButton);
+
+        const timestamp = document.createElement('div');
+        timestamp.className = 'note-timestamp';
+        timestamp.textContent = note.timestamp || '';
+
+        const content = document.createElement('div');
+        content.className = 'note-content';
+        content.textContent = note.content.length > 100 ? `${note.content.substring(0, 100)}...` : note.content;
+
+        noteItem.append(noteActions, timestamp, content);
+        container.appendChild(noteItem);
+    });
 }
 
 function editSelectedNote(id) {
