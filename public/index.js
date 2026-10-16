@@ -3,7 +3,13 @@ const API_URL = 'http://localhost:3000/tickets';
 function displayTickets(tickets) {
   const tbody = document.querySelector('#ticketsTable tbody');
   tbody.innerHTML = '';
-  tickets.forEach(t => {
+  const sortedTickets = [...tickets].sort((a, b) => {
+    const idB = Number(b.id) || 0;
+    const idA = Number(a.id) || 0;
+    return idB - idA;
+  });
+
+  sortedTickets.forEach(t => {
     const tr = document.createElement('tr');
     
     // Ajouter des classes CSS pour les états
